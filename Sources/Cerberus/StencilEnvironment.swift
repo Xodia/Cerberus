@@ -13,10 +13,8 @@ struct StencilEnvironment {
 
     let environment: Environment
 
-    init() {
-        let ext = StencilExtension.ext
-        let loader = FileSystemLoader(paths: [Path(Bundle.main.bundlePath)])
-        self.environment = Environment(loader: loader, extensions: [ext])
+    init(environment: Environment) {
+        self.environment = environment
     }
 
     func renderTemplate(name: String, context: [String: Any]?) -> String {

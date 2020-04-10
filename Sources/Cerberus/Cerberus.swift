@@ -6,18 +6,17 @@ import CerberusCore
 
 public struct Cerberus {
 
-    let environment = StencilEnvironment()
+    let environment: StencilEnvironment
 
-    public init() {
-        
+    public typealias StencilTemplate = (Template, (Module, Submodule, Language) -> [String: Any])
+    private let templates: [StencilTemplate]
+
+    public init(environment: Environment, templates: [StencilTemplate]) {
+        self.templates = templates
+        self.environment = StencilEnvironment(environment: environment)
     }
 
-    public enum ExportType: String {
-        case iOS = "ios"
-        case android
-    }
-
-    public func export(type: ExportType, outputDirectory: Folder, module: Module) {
+    public func export(outputDirectory: Folder, module: Module) {
         if let subfolder = try? outputDirectory.subfolder(at: "generated.cerberus") {
             try? subfolder.delete()
         }
@@ -28,28 +27,20 @@ public struct Cerberus {
         }
 
         module.submodules.forEach { (submodule) in
-            switch type {
-            case .iOS:
-                ios(genFolder, module: module, submodule: submodule)
-            case .android:
-                android(genFolder, parentName: module.name, submodule: submodule)
-            }
+            generate(genFolder, module: module, submodule: submodule)
         }
     }
 }
 
 private extension Cerberus {
 
-    func ios(_ folder: Folder, module: Module, submodule: Submodule) {
+    func generate(_ folder: Folder, module: Module, submodule: Submodule) {
         submodule.language.forEach { (language) in
-            print("\(folder.path)/\(language.identifier).lproj/\(module.name)\(submodule.name).strings")
-            iOSXMLStrings(stencilEnvironment: environment).format(module: module, submodule: submodule, language: language, outputFolder: folder)
-        }
-    }
-
-    func android(_ folder: Folder, parentName: String, submodule: Submodule) {
-        submodule.language.forEach { (language) in
-            print("\(folder.path)/resources-\(language.identifier)/\(parentName)\(submodule.name).xml")
+            templates.forEach { (template, output) in
+                let context = output(module, submodule, language)
+                let content = environment.renderTemplate(name: template.name ?? "", context: context)
+                FileGenerator.createFile(at: "", fileName: "", content: content)
+            }
         }
     }
 }
