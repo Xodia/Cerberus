@@ -25,6 +25,6 @@ let package = Package(
             dependencies: ["Files", "Stencil", "CerberusCore"]),
         .testTarget(
             name: "CerberusTests",
-            dependencies: ["Cerberus"]),
+            dependencies: ["Cerberus", "Files", "Stencil", "CerberusCore"]),
     ]
 )
