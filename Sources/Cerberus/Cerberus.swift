@@ -6,6 +6,10 @@ import CerberusCore
 
 public struct Cerberus {
 
+    public init() {
+        
+    }
+
     public enum ExportType: String {
         case iOS = "ios"
         case android
