@@ -8,7 +8,8 @@ public struct Cerberus {
 
     let environment: StencilEnvironment
 
-    public typealias StencilTemplate = (Template, (Module, Submodule, Language) -> [String: Any])
+    public typealias StencilTemplateName = String
+    public typealias StencilTemplate = (StencilTemplateName, (Module, Submodule, Language) -> (fileName: String, context: [String: Any]))
     private let templates: [StencilTemplate]
 
     public init(environment: Environment, templates: [StencilTemplate]) {
@@ -38,8 +39,8 @@ private extension Cerberus {
         submodule.language.forEach { (language) in
             templates.forEach { (template, output) in
                 let context = output(module, submodule, language)
-                let content = environment.renderTemplate(name: template.name ?? "", context: context)
-                FileGenerator.createFile(at: "", fileName: "", content: content)
+                let content = environment.renderTemplate(name: template, context: context.context)
+                FileGenerator.createFile(at: folder.path + language.identifier, fileName: context.fileName, content: content)
             }
         }
     }
