@@ -1,1 +1,3 @@
-# Cerberus
+# MyLibrary
+
+A description of this package.
