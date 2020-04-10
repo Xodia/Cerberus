@@ -6,6 +6,8 @@ import CerberusCore
 
 public struct Cerberus {
 
+    let environment = StencilEnvironment()
+
     public init() {
         
     }
@@ -28,7 +30,7 @@ public struct Cerberus {
         module.submodules.forEach { (submodule) in
             switch type {
             case .iOS:
-                ios(genFolder, parentName: module.name, submodule: submodule)
+                ios(genFolder, module: module, submodule: submodule)
             case .android:
                 android(genFolder, parentName: module.name, submodule: submodule)
             }
@@ -38,9 +40,10 @@ public struct Cerberus {
 
 private extension Cerberus {
 
-    func ios(_ folder: Folder, parentName: String, submodule: Submodule) {
+    func ios(_ folder: Folder, module: Module, submodule: Submodule) {
         submodule.language.forEach { (language) in
-            print("\(folder.path)/\(language.identifier).lproj/\(parentName)\(submodule.name).strings")
+            print("\(folder.path)/\(language.identifier).lproj/\(module.name)\(submodule.name).strings")
+            iOSXMLStrings(stencilEnvironment: environment).format(module: module, submodule: submodule, language: language, outputFolder: folder)
         }
     }
 
@@ -48,10 +51,5 @@ private extension Cerberus {
         submodule.language.forEach { (language) in
             print("\(folder.path)/resources-\(language.identifier)/\(parentName)\(submodule.name).xml")
         }
-    }
-
-    func stencilEnvironment(for type: ExportType) -> Environment {
-        let loader = FileSystemLoader(paths: [Path(Bundle.main.bundlePath)])
-        return Environment(loader: loader, extensions: [])
     }
 }
