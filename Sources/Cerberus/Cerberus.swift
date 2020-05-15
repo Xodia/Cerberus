@@ -9,7 +9,7 @@ public struct Cerberus {
     let environment: StencilEnvironment
 
     public enum GenerationType {
-        case eachLanguage
+        case eachLanguage(extension: String? = nil)
         case once
     }
 
@@ -22,13 +22,13 @@ public struct Cerberus {
         self.environment = StencilEnvironment(environment: environment)
     }
 
-    public func export(outputDirectory: Folder, module: Module) {
-        if let subfolder = try? outputDirectory.subfolder(at: "generated.cerberus") {
+    public func export(outputDirectory: Folder, module: Module, subfolderPath: String? = "generated.cerberus") {
+        if let subfolderPath = subfolderPath, let subfolder = try? outputDirectory.subfolder(at: subfolderPath) {
             try? subfolder.delete()
         }
 
         guard let genFolder = try? outputDirectory.createSubfolder(at: "generated.cerberus") else {
-            print("Couldn't created generated.cerberus on the directory output: \(outputDirectory.path)")
+            CerberusLogger.log("Couldn't created generated.cerberus on the directory output: \(outputDirectory.path)")
             return
         }
 
@@ -43,14 +43,24 @@ private extension Cerberus {
     func generate(_ folder: Folder, module: Module, submodule: Submodule) {
         templates.forEach { (template, output) in
             switch template.generationType {
-            case .eachLanguage:
+            case .eachLanguage(let ext):
                 submodule.language.forEach { (language) in
                     let context = output(module, submodule, language)
                     let content = environment.renderTemplate(name: template.name, context: context.context)
-                    FileGenerator.createFile(at: folder.path + language.identifier, fileName: context.fileName, content: content)
+                    let path: String = {
+                        guard let ext = ext else {
+                            return folder.path + language.identifier
+                        }
+                        return folder.path + language.identifier + ext
+                    }()
+                    FileGenerator.createFile(at: path, fileName: context.fileName, content: content)
                 }
             case .once:
-                let context = output(module, submodule, submodule.language.first!)
+                guard let firstLanguage = submodule.language.first else {
+                    CerberusLogger.log("Misformated submodule \(submodule)")
+                    return
+                }
+                let context = output(module, submodule, firstLanguage)
                 let content = environment.renderTemplate(name: template.name, context: context.context)
                 FileGenerator.createFile(at: folder.path, fileName: context.fileName, content: content)
             }

@@ -14,18 +14,18 @@ struct FileGenerator {
         createDirectoryAtPathIfNotExisting(path: path)
 
         guard let data = content.data(using: .utf8) else {
-            print("error(message: Could not transform content \(content) to UTF8.")
+            CerberusLogger.log("Could not transform content \(content) to UTF8.")
             return
         }
 
         let filePath = [path, "/", fileName].joined()
         FileManager.default.createFile(atPath: filePath, contents: data, attributes: nil)
-        print("successFileCreation(name: \(fileName), path: \(path)")
+        CerberusLogger.log("Created file named: \(fileName) - path: \(path)")
     }
 
     static func createDirectoryAtPathIfNotExisting(path: String) {
         if !FileManager.default.fileExists(atPath: path) {
-            print("directoryCreation(path: \(path))")
+            CerberusLogger.log("Create directory: \(path)")
             try? FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: false, attributes: nil)
         }
     }

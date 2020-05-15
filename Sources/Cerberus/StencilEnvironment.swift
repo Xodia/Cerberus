@@ -9,6 +9,7 @@ import Foundation
 import Stencil
 import PathKit
 
+
 struct StencilEnvironment {
 
     let environment: Environment
@@ -22,7 +23,7 @@ struct StencilEnvironment {
             let output = try environment.renderTemplate(name: name, context: context ?? [:])
             return output
         } catch {
-            print("Could not render template \(name) with given context: \(String(describing: context)) err: \(error)")
+            CerberusLogger.log("Could not render template \(name) with given context: \(String(describing: context)) err: \(error)")
             return ""
         }
     }
