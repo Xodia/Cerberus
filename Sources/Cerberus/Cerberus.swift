@@ -23,13 +23,18 @@ public struct Cerberus {
     }
 
     public func export(outputDirectory: Folder, module: Module, subfolderPath: String? = "generated.cerberus") {
+        let genFolder: Folder
         if let subfolderPath = subfolderPath, let subfolder = try? outputDirectory.subfolder(at: subfolderPath) {
             try? subfolder.delete()
-        }
 
-        guard let genFolder = try? outputDirectory.createSubfolder(at: "generated.cerberus") else {
-            CerberusLogger.log("Couldn't created generated.cerberus on the directory output: \(outputDirectory.path)")
-            return
+            guard let newSubfolder = try? outputDirectory.createSubfolder(at: subfolderPath) else {
+                CerberusLogger.log("Couldn't created generated.cerberus on the directory output: \(outputDirectory.path)")
+                return
+            }
+
+            genFolder = newSubfolder
+        } else {
+            genFolder = outputDirectory
         }
 
         module.submodules.forEach { (submodule) in

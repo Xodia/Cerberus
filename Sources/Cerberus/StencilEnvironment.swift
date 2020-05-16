@@ -9,7 +9,6 @@ import Foundation
 import Stencil
 import PathKit
 
-
 struct StencilEnvironment {
 
     let environment: Environment
